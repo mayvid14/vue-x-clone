@@ -5,6 +5,7 @@
     "Nuxt",
     "supabase",
     "tailwindcss",
+    "toastify",
     "vuelidate",
     "vueuse"
   ]

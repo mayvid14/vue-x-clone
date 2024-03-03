@@ -2,6 +2,9 @@
 import useVuelidate, { type ValidationRule } from '@vuelidate/core'
 import { email, helpers, minLength, required, sameAs } from '@vuelidate/validators'
 
+const { $toast: toast } = useNuxtApp()
+const router = useRouter()
+
 /**
  * The 2-way value that determines if modal is shown
  */
@@ -51,7 +54,7 @@ const validation = useVuelidate(
 // Listen to "escape" key presses
 const { escape } = useMagicKeys()
 
-const modal = ref<HTMLDialogElement | null>()
+const modal = ref<HTMLDialogElement | undefined>()
 
 /**
  * Resets the form
@@ -74,11 +77,24 @@ async function signUp() {
       body: form,
       method: 'POST',
     })
-    // TODO: If signed in, navigate to home if new user, else navigate to login
+
+    if (data.user == null && data.session == null) {
+      // Already signed in
+      toast.info('This email already exists. Please sign in')
+      show.value = false
+      return
+    }
+
+    toast.success('Signed In successfully')
+    router.push('/home')
   }
   catch (err) {
-    // TODO: show error message based on response
     console.error(err)
+    if ((err as { statusCode: number }).statusCode === 401) {
+      toast.error('Invalid email or password')
+      return
+    }
+    toast.error('Some error occurred. Please try again')
   }
 }
 
@@ -87,7 +103,13 @@ watch(show, (newValue) => {
   if (!modal.value)
     return
 
-  newValue ? modal.value.showModal() : resetForm()
+  if (newValue) {
+    modal.value.showModal()
+    return
+  }
+
+  resetForm()
+  modal.value.close()
 })
 
 // Set the value as false if escape is pressed to close the modal
