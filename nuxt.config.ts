@@ -1,3 +1,4 @@
+/* eslint-disable node/prefer-global/process */
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   devtools: {
@@ -20,4 +21,8 @@ export default defineNuxtConfig({
     'nuxt-icon',
     '@vueuse/nuxt',
   ],
+  runtimeConfig: {
+    dbUrl: process.env.SUPABASE_URL,
+    dbKey: process.env.SUPABASE_ANON_KEY,
+  },
 })

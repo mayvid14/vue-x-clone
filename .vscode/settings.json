@@ -3,6 +3,7 @@
     "antfu",
     "daisyui",
     "Nuxt",
+    "supabase",
     "tailwindcss",
     "vuelidate",
     "vueuse"

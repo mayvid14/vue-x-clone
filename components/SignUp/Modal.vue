@@ -64,6 +64,24 @@ function resetForm() {
   validation.value.$reset()
 }
 
+/**
+ * Function that makes the API call to signup
+ */
+async function signUp() {
+  try {
+    // Make the API call
+    const data = await $fetch('/api/signup', {
+      body: form,
+      method: 'POST',
+    })
+    // TODO: If signed in, navigate to home if new user, else navigate to login
+  }
+  catch (err) {
+    // TODO: show error message based on response
+    console.error(err)
+  }
+}
+
 // If the prop is set to true, then show modal
 watch(show, (newValue) => {
   if (!modal.value)
@@ -130,7 +148,7 @@ watch(escape, (v) => {
           </label>
         </form>
 
-        <button class="btn btn-ghost btn-outline rounded-full btn-block mt-4" :disabled="validation.$invalid">
+        <button class="btn btn-ghost btn-outline rounded-full btn-block mt-4" :disabled="validation.$invalid" @click.prevent="signUp">
           Create
         </button>
       </div>
