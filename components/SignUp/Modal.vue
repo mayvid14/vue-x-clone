@@ -12,6 +12,10 @@ const router = useRouter()
 const show = defineModel({
   default: false,
 })
+const modal = ref<HTMLDialogElement | undefined>()
+
+// Helper methods for modals
+useModals(show, modal)
 
 const form = reactive({
   email: '',
@@ -51,11 +55,6 @@ const validation = useVuelidate(
     $autoDirty: true,
   },
 )
-
-// Listen to "escape" key presses
-const { escape } = useMagicKeys()
-
-const modal = ref<HTMLDialogElement | undefined>()
 
 /**
  * Resets the form
@@ -101,22 +100,10 @@ async function signUp() {
 
 // If the prop is set to true, then show modal
 watch(show, (newValue) => {
-  if (!modal.value)
+  if (newValue)
     return
-
-  if (newValue) {
-    modal.value.showModal()
-    return
-  }
 
   resetForm()
-  modal.value.close()
-})
-
-// Set the value as false if escape is pressed to close the modal
-watch(escape, (v) => {
-  if (v)
-    show.value = false
 })
 </script>
 

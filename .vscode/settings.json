@@ -3,6 +3,7 @@
     "antfu",
     "daisyui",
     "Nuxt",
+    "Pinia",
     "signout",
     "supabase",
     "tailwindcss",

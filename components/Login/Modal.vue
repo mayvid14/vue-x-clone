@@ -1,10 +1,14 @@
 <script setup lang="ts">
 import useVuelidate, { type ValidationRule } from '@vuelidate/core'
-import { email, helpers, minLength, required, sameAs } from '@vuelidate/validators'
+import { email, helpers, required } from '@vuelidate/validators'
 import type { XError } from '~/interfaces/errors'
+import type { Credentials } from '~/interfaces/params'
+import { useUsersStore } from '~/stores/users'
 
 const { $toast: toast } = useNuxtApp()
 const router = useRouter()
+
+const { login: doLogin } = useUsersStore()
 
 /**
  * The 2-way value that determines if modal is shown
@@ -12,8 +16,12 @@ const router = useRouter()
 const show = defineModel({
   default: false,
 })
+const modal = ref<HTMLDialogElement | undefined>()
 
-const form = reactive({
+// Handle modals visibility
+useModals(show, modal)
+
+const form = reactive<Credentials>({
   email: '',
   password: '',
 })
@@ -45,11 +53,6 @@ const validation = useVuelidate(
   },
 )
 
-// Listen to "escape" key presses
-const { escape } = useMagicKeys()
-
-const modal = ref<HTMLDialogElement | undefined>()
-
 /**
  * Resets the form
  */
@@ -66,13 +69,9 @@ function resetForm() {
 async function logIn() {
   try {
     // Make the API call
-    // Do something with this object later
-    const data = await $fetch('/api/login', {
-      body: form,
-      method: 'POST',
-    })
+    await doLogin(form)
 
-    toast.success('Signed In successfully')
+    toast.success('Signed in successfully')
     router.push('/home')
   }
   catch (err) {
@@ -88,22 +87,10 @@ async function logIn() {
 
 // If the prop is set to true, then show modal
 watch(show, (newValue) => {
-  if (!modal.value)
+  if (newValue)
     return
-
-  if (newValue) {
-    modal.value.showModal()
-    return
-  }
 
   resetForm()
-  modal.value.close()
-})
-
-// Set the value as false if escape is pressed to close the modal
-watch(escape, (v) => {
-  if (v)
-    show.value = false
 })
 </script>
 
