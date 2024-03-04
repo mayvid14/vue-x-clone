@@ -8,6 +8,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     limit: 5,
     newestOnTop: true,
     theme: 'dark',
+    clearOnUrlChange: false,
   } as ToastContainerOptions)
 
   return {
