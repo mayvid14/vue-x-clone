@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import useVuelidate, { type ValidationRule } from '@vuelidate/core'
 import { email, helpers, minLength, required, sameAs } from '@vuelidate/validators'
+import type { XError } from '~/interfaces/errors'
 
 const { $toast: toast } = useNuxtApp()
 const router = useRouter()
@@ -78,7 +79,7 @@ async function signUp() {
       method: 'POST',
     })
 
-    if (data.user == null && data.session == null) {
+    if (data.session == null) {
       // Already signed in
       toast.info('This email already exists. Please sign in')
       show.value = false
@@ -90,7 +91,7 @@ async function signUp() {
   }
   catch (err) {
     console.error(err)
-    if ((err as { statusCode: number }).statusCode === 401) {
+    if ((err as XError<unknown>).statusCode === 401) {
       toast.error('Invalid email or password')
       return
     }
@@ -138,7 +139,7 @@ watch(escape, (v) => {
               <span class="label-text">Email</span>
             </div>
             <input v-model="form.email" type="email" placeholder="Type your email here" class="input input-bordered w-full">
-            <TransitionGroup name="list" tag="div" class="relative">
+            <TransitionGroup name="fade" tag="div" class="relative">
               <div v-for="error of validation.form.email.$errors" :key="error.$uid" class="label">
                 <span class="label-text-alt text-error">{{ error.$message }}</span>
               </div>
@@ -150,7 +151,7 @@ watch(escape, (v) => {
               <span class="label-text">Password</span>
             </div>
             <input v-model="form.password" type="password" placeholder="Type your password here" class="input input-bordered w-full">
-            <TransitionGroup name="list" tag="div" class="relative">
+            <TransitionGroup name="fade" tag="div" class="relative">
               <div v-for="error of validation.form.password.$errors" :key="error.$uid" class="label">
                 <span class="label-text-alt text-error">{{ error.$message }}</span>
               </div>
@@ -162,7 +163,7 @@ watch(escape, (v) => {
               <span class="label-text">Confirm Password</span>
             </div>
             <input v-model="confirmPassword" type="password" placeholder="Type your password again" class="input input-bordered w-full">
-            <TransitionGroup name="list" tag="div" class="relative">
+            <TransitionGroup name="fade" tag="div" class="relative">
               <div v-for="error of validation.confirmPassword.$errors" :key="error.$uid" class="label">
                 <span class="label-text-alt text-error">{{ error.$message }}</span>
               </div>

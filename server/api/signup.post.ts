@@ -28,7 +28,6 @@ export default defineEventHandler(async (event) => {
     // If error because of already registered, return a null structure
     if (dbError.message === 'User already registered') {
       return {
-        user: null,
         session: null,
       }
     }
@@ -41,8 +40,9 @@ export default defineEventHandler(async (event) => {
   }
 
   // Return the response
-  // TODO: see what are the necessary fields to return to client side
   return {
-    ...dbData,
+    session: {
+      ...dbData.session,
+    },
   }
 })
