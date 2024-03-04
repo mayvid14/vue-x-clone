@@ -18,8 +18,6 @@ const form = reactive({
   password: '',
 })
 
-const confirmPassword = ref('')
-
 /**
  * Helper method for validation rule with error message
  */
@@ -35,18 +33,13 @@ const rules = computed(() => ({
     },
     password: {
       required: check(required, 'This is a required field'),
-      minLength: check(minLength(8), 'Password should be at least 8 characters long'),
-      // strength,
     },
-  },
-  confirmPassword: {
-    matchPassword: check(sameAs(form.password), 'Passwords do not match'),
   },
 }))
 
 const validation = useVuelidate(
   rules,
-  { form, confirmPassword },
+  { form },
   {
     $autoDirty: true,
   },
@@ -63,39 +56,33 @@ const modal = ref<HTMLDialogElement | undefined>()
 function resetForm() {
   form.email = ''
   form.password = ''
-  confirmPassword.value = ''
 
   validation.value.$reset()
 }
 
 /**
- * Function that makes the API call to signup
+ * Function that makes the API call to login
  */
-async function signUp() {
+async function logIn() {
   try {
     // Make the API call
-    const data = await $fetch('/api/signup', {
+    // Do something with this object later
+    const data = await $fetch('/api/login', {
       body: form,
       method: 'POST',
     })
 
-    if (data.session == null) {
-      // Already signed in
-      toast.info('This email already exists. Please sign in')
-      show.value = false
-      return
-    }
-
-    toast.success('Signed Up successfully')
+    toast.success('Signed In successfully')
     router.push('/home')
   }
   catch (err) {
-    console.error(err)
-    if ((err as XError<unknown>).statusCode === 401) {
-      toast.error('Invalid email or password')
+    const error = err as XError<unknown>
+
+    if (error.statusCode === 400) {
+      toast.error('Incorrect email or password')
       return
     }
-    toast.error('Some error occurred. Please try again')
+    toast.error('Some error occurred. Please try again later')
   }
 }
 
@@ -124,23 +111,38 @@ watch(escape, (v) => {
   <dialog ref="modal" class="modal">
     <div class="modal-box">
       <form method="dialog">
-        <button class="btn btn-sm btn-circle btn-ghost absolute left-2 top-2" @click="show = false">
+        <button
+          class="btn btn-sm btn-circle btn-ghost absolute left-2 top-2"
+          @click="show = false"
+        >
           ✕
         </button>
       </form>
       <div class="flex flex-col prose px-10">
-        <Icon name="carbon:logo-x" class="text-3xl w-full" />
+        <Icon
+          name="carbon:logo-x"
+          class="text-3xl w-full"
+        />
         <h2 class="mt-3">
-          Create your account
+          Enter credentials to login
         </h2>
         <form>
           <label class="form-control w-full">
             <div class="label">
               <span class="label-text">Email</span>
             </div>
-            <input v-model="form.email" type="email" placeholder="Type your email here" class="input input-bordered w-full">
+            <input
+              v-model="form.email"
+              type="email"
+              placeholder="Type your email here"
+              class="input input-bordered w-full"
+            >
             <TransitionGroup name="fade" tag="div" class="relative">
-              <div v-for="error of validation.form.email.$errors" :key="error.$uid" class="label">
+              <div
+                v-for="error of validation.form.email.$errors"
+                :key="error.$uid"
+                class="label"
+              >
                 <span class="label-text-alt text-error">{{ error.$message }}</span>
               </div>
             </TransitionGroup>
@@ -150,29 +152,30 @@ watch(escape, (v) => {
             <div class="label">
               <span class="label-text">Password</span>
             </div>
-            <input v-model="form.password" type="password" placeholder="Type your password here" class="input input-bordered w-full">
+            <input
+              v-model="form.password"
+              type="password"
+              placeholder="Type your password here"
+              class="input input-bordered w-full"
+            >
             <TransitionGroup name="fade" tag="div" class="relative">
-              <div v-for="error of validation.form.password.$errors" :key="error.$uid" class="label">
-                <span class="label-text-alt text-error">{{ error.$message }}</span>
-              </div>
-            </TransitionGroup>
-          </label>
-
-          <label class="form-control w-full">
-            <div class="label">
-              <span class="label-text">Confirm Password</span>
-            </div>
-            <input v-model="confirmPassword" type="password" placeholder="Type your password again" class="input input-bordered w-full">
-            <TransitionGroup name="fade" tag="div" class="relative">
-              <div v-for="error of validation.confirmPassword.$errors" :key="error.$uid" class="label">
+              <div
+                v-for="error of validation.form.password.$errors"
+                :key="error.$uid"
+                class="label"
+              >
                 <span class="label-text-alt text-error">{{ error.$message }}</span>
               </div>
             </TransitionGroup>
           </label>
         </form>
 
-        <button class="btn btn-ghost btn-outline rounded-full btn-block mt-4" :disabled="validation.$invalid" @click.prevent="signUp">
-          Create
+        <button
+          class="btn btn-ghost btn-outline rounded-full btn-block mt-4"
+          :disabled="validation.$invalid"
+          @click.prevent="logIn"
+        >
+          Sign In
         </button>
       </div>
     </div>

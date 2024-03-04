@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 const [showSignUp, toggleSignIn] = useToggle(false)
+const [showLogIn, toggleLogIn] = useToggle(false)
 </script>
 
 <template>
@@ -20,18 +21,25 @@ const [showSignUp, toggleSignIn] = useToggle(false)
       <div class="divider">
         or
       </div>
-      <button class="btn btn-primary rounded-full text-white" @click="() => toggleSignIn(!showSignUp)">
+      <button
+        class="btn btn-primary rounded-full text-white"
+        @click="() => toggleSignIn(!showSignUp)"
+      >
         Create account
       </button>
       <div class="w-full mt-10">
         <h4 class="mb-5">
           Already have an account?
         </h4>
-        <button class="btn btn-primary btn-outline btn-block rounded-full">
+        <button
+          class="btn btn-primary btn-outline btn-block rounded-full"
+          @click="() => toggleLogIn(!showLogIn)"
+        >
           Sign in
         </button>
       </div>
     </div>
   </div>
   <SignUpModal v-model="showSignUp" />
+  <LoginModal v-model="showLogIn" />
 </template>
