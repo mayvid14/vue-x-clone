@@ -1,14 +1,10 @@
 <script setup lang="ts">
 import useVuelidate, { type ValidationRule } from '@vuelidate/core'
 import { email, helpers, required } from '@vuelidate/validators'
-import type { XError } from '~/interfaces/errors'
 import type { Credentials } from '~/interfaces/params'
-import { useUsersStore } from '~/stores/users'
 
 const { $toast: toast } = useNuxtApp()
-const router = useRouter()
-
-const { login: doLogin } = useUsersStore()
+const { login } = useUsersStore()
 
 /**
  * The 2-way value that determines if modal is shown
@@ -45,6 +41,7 @@ const rules = computed(() => ({
   },
 }))
 
+// The validation state
 const validation = useVuelidate(
   rules,
   { form },
@@ -69,18 +66,18 @@ function resetForm() {
 async function logIn() {
   try {
     // Make the API call
-    await doLogin(form)
+    const { success } = await login(form)
 
-    toast.success('Signed in successfully')
-    router.push('/home')
-  }
-  catch (err) {
-    const error = err as XError<unknown>
-
-    if (error.statusCode === 400) {
+    if (!success) {
       toast.error('Incorrect email or password')
       return
     }
+
+    // Login is OK
+    toast.success('Signed in successfully')
+    navigateTo('/home')
+  }
+  catch (err) {
     toast.error('Some error occurred. Please try again later')
   }
 }
@@ -95,7 +92,10 @@ watch(show, (newValue) => {
 </script>
 
 <template>
-  <dialog ref="modal" class="modal">
+  <dialog
+    ref="modal"
+    class="modal"
+  >
     <div class="modal-box">
       <form method="dialog">
         <button

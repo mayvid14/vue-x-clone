@@ -1,31 +1,29 @@
 <script lang="ts" setup>
 const { $toast: toast } = useNuxtApp()
 
-const router = useRouter()
+const { session, signout } = useUsersStore()
 
 /**
  * Sign out method
  */
 async function signOut() {
   try {
-    await $fetch('/api/signout', {
-      method: 'POST',
-      body: {
-        type: 'local',
-      },
-    })
+    await signout()
 
     toast.info('Successfully logged out')
-    router.push('/')
+    navigateTo('/')
   }
   catch (err) {
-    toast.error('Error while logging out')
+    toast.error('Error while logging out. Please refresh')
   }
 }
 </script>
 
 <template>
   <span>Home</span>
+  <div>
+    {{ session }}
+  </div>
   <button class="btn btn-primary rounded-full btn-block" @click="signOut">
     Sign out
   </button>

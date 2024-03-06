@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import useVuelidate, { type ValidationRule } from '@vuelidate/core'
 import { email, helpers, minLength, required, sameAs } from '@vuelidate/validators'
-import type { XError } from '~/interfaces/errors'
+import type { Credentials } from '~/interfaces/params'
 
 const { $toast: toast } = useNuxtApp()
-const router = useRouter()
+const { signup } = useUsersStore()
 
 /**
  * The 2-way value that determines if modal is shown
@@ -17,7 +17,7 @@ const modal = ref<HTMLDialogElement | undefined>()
 // Helper methods for modals
 useModals(show, modal)
 
-const form = reactive({
+const form = reactive<Credentials>({
   email: '',
   password: '',
 })
@@ -48,6 +48,7 @@ const rules = computed(() => ({
   },
 }))
 
+// The validation state
 const validation = useVuelidate(
   rules,
   { form, confirmPassword },
@@ -73,27 +74,26 @@ function resetForm() {
 async function signUp() {
   try {
     // Make the API call
-    const data = await $fetch('/api/signup', {
-      body: form,
-      method: 'POST',
-    })
+    const { implicit, success } = await signup(form)
 
-    if (data.session == null) {
-      // Already signed in
-      toast.info('This email already exists. Please sign in')
-      show.value = false
+    if (!success) {
+      if (implicit) {
+        // Already signed in
+        toast.info('This email already exists. Please sign in')
+        show.value = false
+        return
+      }
+
+      // Error in signing up
+      toast.error('Some error occurred. Please try again')
       return
     }
 
+    // Sign up OK
     toast.success('Signed Up successfully')
-    router.push('/home')
+    navigateTo('/home')
   }
   catch (err) {
-    console.error(err)
-    if ((err as XError<unknown>).statusCode === 401) {
-      toast.error('Invalid email or password')
-      return
-    }
     toast.error('Some error occurred. Please try again')
   }
 }
@@ -108,15 +108,24 @@ watch(show, (newValue) => {
 </script>
 
 <template>
-  <dialog ref="modal" class="modal">
+  <dialog
+    ref="modal"
+    class="modal"
+  >
     <div class="modal-box">
       <form method="dialog">
-        <button class="btn btn-sm btn-circle btn-ghost absolute left-2 top-2" @click="show = false">
+        <button
+          class="btn btn-sm btn-circle btn-ghost absolute left-2 top-2"
+          @click="show = false"
+        >
           ✕
         </button>
       </form>
       <div class="flex flex-col prose px-10">
-        <Icon name="carbon:logo-x" class="text-3xl w-full" />
+        <Icon
+          name="carbon:logo-x"
+          class="text-3xl w-full"
+        />
         <h2 class="mt-3">
           Create your account
         </h2>
@@ -125,9 +134,20 @@ watch(show, (newValue) => {
             <div class="label">
               <span class="label-text">Email</span>
             </div>
-            <input v-model="form.email" type="email" placeholder="Type your email here" class="input input-bordered w-full">
-            <TransitionGroup name="fade" tag="div" class="relative">
-              <div v-for="error of validation.form.email.$errors" :key="error.$uid" class="label">
+            <input
+              v-model="form.email"
+              type="email"
+              placeholder="Type your email here"
+              class="input input-bordered w-full"
+            >
+            <TransitionGroup
+              name="fade" tag="div" class="relative"
+            >
+              <div
+                v-for="error of validation.form.email.$errors"
+                :key="error.$uid"
+                class="label"
+              >
                 <span class="label-text-alt text-error">{{ error.$message }}</span>
               </div>
             </TransitionGroup>
@@ -137,9 +157,19 @@ watch(show, (newValue) => {
             <div class="label">
               <span class="label-text">Password</span>
             </div>
-            <input v-model="form.password" type="password" placeholder="Type your password here" class="input input-bordered w-full">
-            <TransitionGroup name="fade" tag="div" class="relative">
-              <div v-for="error of validation.form.password.$errors" :key="error.$uid" class="label">
+            <input
+              v-model="form.password"
+              type="password" placeholder="Type your password here"
+              class="input input-bordered w-full"
+            >
+            <TransitionGroup
+              name="fade"
+              tag="div" class="relative"
+            >
+              <div
+                v-for="error of validation.form.password.$errors"
+                :key="error.$uid" class="label"
+              >
                 <span class="label-text-alt text-error">{{ error.$message }}</span>
               </div>
             </TransitionGroup>
@@ -149,16 +179,30 @@ watch(show, (newValue) => {
             <div class="label">
               <span class="label-text">Confirm Password</span>
             </div>
-            <input v-model="confirmPassword" type="password" placeholder="Type your password again" class="input input-bordered w-full">
-            <TransitionGroup name="fade" tag="div" class="relative">
-              <div v-for="error of validation.confirmPassword.$errors" :key="error.$uid" class="label">
+            <input
+              v-model="confirmPassword"
+              type="password" placeholder="Type your password again"
+              class="input input-bordered w-full"
+            >
+            <TransitionGroup
+              name="fade" tag="div"
+              class="relative"
+            >
+              <div
+                v-for="error of validation.confirmPassword.$errors"
+                :key="error.$uid" class="label"
+              >
                 <span class="label-text-alt text-error">{{ error.$message }}</span>
               </div>
             </TransitionGroup>
           </label>
         </form>
 
-        <button class="btn btn-ghost btn-outline rounded-full btn-block mt-4" :disabled="validation.$invalid" @click.prevent="signUp">
+        <button
+          class="btn btn-ghost btn-outline rounded-full btn-block mt-4"
+          :disabled="validation.$invalid"
+          @click.prevent="signUp"
+        >
           Create
         </button>
       </div>

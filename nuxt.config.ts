@@ -21,9 +21,14 @@ export default defineNuxtConfig({
     'nuxt-icon',
     '@vueuse/nuxt',
     '@pinia/nuxt',
+    '@nuxtjs/supabase',
   ],
-  runtimeConfig: {
-    dbUrl: process.env.SUPABASE_URL,
-    dbKey: process.env.SUPABASE_ANON_KEY,
+  supabase: {
+    key: process.env.SUPABASE_ANON_KEY,
+    redirectOptions: {
+      login: '/',
+      callback: '/confirm',
+      cookieRedirect: true,
+    },
   },
 })
