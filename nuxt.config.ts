@@ -20,6 +20,7 @@ export default defineNuxtConfig({
   modules: [
     'nuxt-icon',
     '@vueuse/nuxt',
+    '@pinia/nuxt',
   ],
   runtimeConfig: {
     dbUrl: process.env.SUPABASE_URL,
